@@ -1,3 +1,6 @@
-Flask[async]
-Telethon
+flask
+telethon
+gspread
+google-auth
+google-auth-oauthlib
 gunicorn
