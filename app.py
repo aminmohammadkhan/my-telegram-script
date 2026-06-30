@@ -8,7 +8,7 @@ from google.oauth2 import service_account
 
 # تنظیمات کلاینت (مطمئن شو در Variables سایت Railway این‌ها را داری)
 client = TelegramClient(StringSession(os.environ['SESSION_STRING']), 
-                        int(os.environ['API_ID']), os.environ['API_HASH'])
+                        int(os.environ['38107594']), os.environ['41c14c86d3b16088c264fb68cd8fc050'])
 
 def run_worker():
     client.start()
@@ -41,6 +41,6 @@ def run_worker():
             
         time.sleep(60) # هر یک دقیقه چک کن
 # فایلِ نشست به صورت خودکار خوانده می‌شود
-client = TelegramClient('session', int(os.environ['API_ID']), os.environ['API_HASH'])
+client = TelegramClient('session', int(os.environ['38107594']), os.environ['41c14c86d3b16088c264fb68cd8fc050'])
 if __name__ == '__main__':
     run_worker()
