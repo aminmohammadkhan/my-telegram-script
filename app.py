@@ -40,6 +40,7 @@ def run_worker():
             print(f"Error: {e}")
             
         time.sleep(60) # هر یک دقیقه چک کن
-
+# فایلِ نشست به صورت خودکار خوانده می‌شود
+client = TelegramClient('session', int(os.environ['API_ID']), os.environ['API_HASH'])
 if __name__ == '__main__':
     run_worker()
