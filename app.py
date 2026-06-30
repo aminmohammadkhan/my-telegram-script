@@ -7,22 +7,23 @@ from threading import Thread
 
 app = Flask(__name__)
 
-# دریافت تنظیمات
-API_ID = int(os.environ.get('API_ID'))
-API_HASH = os.environ.get('API_HASH')
-SESSION_STRING = os.environ.get('SESSION_STRING')
+# دریافت تنظیمات از محیط Railway
+API_ID = int(os.environ.get('API_ID', 0))
+API_HASH = os.environ.get('API_HASH', '')
+SESSION_STRING = os.environ.get('SESSION_STRING', '')
 
-# راه اندازی کلاینت
+# راه اندازی کلاینت تلگرام
 client = TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH)
 
-# تابع کمکی برای اجرای کارهای تلگرامی در لوپ جداگانه
-def run_async(coro):
+# اجرای کلاینت در یک رشته (Thread) جداگانه برای جلوگیری از تداخل
+def start_client():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    return loop.run_until_complete(coro)
+    loop.run_until_complete(client.start())
+    loop.run_forever()
 
-# استارت اولیه کلاینت
-run_async(client.start())
+# استارت کلاینت در پس‌زمینه
+Thread(target=start_client, daemon=True).start()
 
 @app.route('/send', methods=['POST'])
 def send_message():
@@ -31,8 +32,8 @@ def send_message():
     message = data.get('message')
 
     try:
-        # ارسال پیام
-        run_async(client.send_message(phone, message))
+        # ارسال پیام با استفاده از کلاینتِ فعال در رشته‌ی جداگانه
+        asyncio.run_coroutine_threadsafe(client.send_message(phone, message), client.loop).result()
         return jsonify({"status": "success"}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
