@@ -3,21 +3,26 @@ from telethon import TelegramClient
 from telethon.sessions import StringSession
 import os
 import asyncio
+from threading import Thread
 
 app = Flask(__name__)
 
-# گرفتن متغیرها
+# دریافت تنظیمات
 API_ID = int(os.environ.get('API_ID'))
 API_HASH = os.environ.get('API_HASH')
 SESSION_STRING = os.environ.get('SESSION_STRING')
 
-# ایجاد کلاینت به صورت سراسری
+# راه اندازی کلاینت
 client = TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH)
 
-# اجرای کلاینت در پس‌زمینه هنگام بالا آمدن سرور
-loop = asyncio.new_event_loop()
-asyncio.set_event_loop(loop)
-loop.run_until_complete(client.start())
+# تابع کمکی برای اجرای کارهای تلگرامی در لوپ جداگانه
+def run_async(coro):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    return loop.run_until_complete(coro)
+
+# استارت اولیه کلاینت
+run_async(client.start())
 
 @app.route('/send', methods=['POST'])
 def send_message():
@@ -26,8 +31,8 @@ def send_message():
     message = data.get('message')
 
     try:
-        # استفاده از همان لوپِ اصلی برای ارسال پیام
-        loop.run_until_complete(client.send_message(phone, message))
+        # ارسال پیام
+        run_async(client.send_message(phone, message))
         return jsonify({"status": "success"}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
