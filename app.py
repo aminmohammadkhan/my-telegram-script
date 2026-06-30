@@ -5,16 +5,20 @@ import json
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 from google.oauth2 import service_account
+
 # رشته خود را اینجا مستقیماً قرار دهید (مطمئن شوید `=` در انتهای آن باشد)
 my_session = "1BJWap1wBu4fLnQ769tuqZyfiL3gHB9IfKkazUWkvdycxNBu6zCHfPlmQLr_UsnoTikVUnMcMXD3QeHbFcc4m6qBIfCMPv0hcqO7L1HtLTv7Yx6vhUJ8YLz0GLwJ1ZPNKAd8apAEbxt9UVGyvXY6qgyKj4aRWeoqMPCNIqd3O84kS2Qtu0LsFJKUPNV1j5lDPTmtJDUEZ04HYJ7gb35aI9b7ft1XqedosOpb-s8_2dnDF08liyj469tojeyXv3l1lg1Tb4B470UubVFZLDdqSyJ5jswo-NyDERC_fw-lD9LQ6Pa2ISybGbrXbW9ap9Mw8EEEfImN6Ib2hWGzC2kE3GsUDM7_kTMc="
 
 client = TelegramClient(StringSession(my_session), int(os.environ['API_ID']), os.environ['API_HASH'])
 def run_worker():
     client.start()
-    
+    scopes = [
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/drive'
+]
     # خواندن دسترسی از متغیر محیطی (بدون نیاز به فایل)
     creds_dict = json.loads(os.environ['GOOGLE_CREDENTIALS'])
-    creds = service_account.Credentials.from_service_account_info(creds_dict)
+    creds = service_account.Credentials.from_service_account_info(creds_dict, scopes=scopes)
     gc = gspread.authorize(creds)
     
     # نام شیت خود را اینجا بنویس
