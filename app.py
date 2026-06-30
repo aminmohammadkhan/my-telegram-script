@@ -17,7 +17,7 @@ def run_worker():
     'https://www.googleapis.com/auth/drive'
 ]
     # خواندن دسترسی از متغیر محیطی (بدون نیاز به فایل)
-    creds = service_account.Credentials.from_service_account_info('credentials.json', scopes=scopes)
+    creds = service_account.Credentials.from_service_account_file('credentials.json', scopes=scopes)
     gc = gspread.authorize(creds)
     
     # نام شیت خود را اینجا بنویس
