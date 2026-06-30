@@ -5,11 +5,10 @@ import json
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 from google.oauth2 import service_account
+# رشته خود را اینجا مستقیماً قرار دهید (مطمئن شوید `=` در انتهای آن باشد)
+my_session = "1BJWap1wBu4fLnQ769tuqZyfiL3gHB9IfKkazUWkvdycxNBu6zCHfPlmQLr_UsnoTikVUnMcMXD3QeHbFcc4m6qBIfCMPv0hcqO7L1HtLTv7Yx6vhUJ8YLz0GLwJ1ZPNKAd8apAEbxt9UVGyvXY6qgyKj4aRWeoqMPCNIqd3O84kS2Qtu0LsFJKUPNV1j5lDPTmtJDUEZ04HYJ7gb35aI9b7ft1XqedosOpb-s8_2dnDF08liyj469tojeyXv3l1lg1Tb4B470UubVFZLDdqSyJ5jswo-NyDERC_fw-lD9LQ6Pa2ISybGbrXbW9ap9Mw8EEEfImN6Ib2hWGzC2kE3GsUDM7_kTMc="
 
-# تنظیمات کلاینت (مطمئن شو در Variables سایت Railway این‌ها را داری)
-client = TelegramClient(StringSession(os.environ['SESSION_STRING']), 
-                        int(os.environ['38107594']), os.environ['41c14c86d3b16088c264fb68cd8fc050'])
-
+client = TelegramClient(StringSession(my_session), int(os.environ['API_ID']), os.environ['API_HASH'])
 def run_worker():
     client.start()
     
@@ -40,7 +39,7 @@ def run_worker():
             print(f"Error: {e}")
             
         time.sleep(60) # هر یک دقیقه چک کن
-# فایلِ نشست به صورت خودکار خوانده می‌شود
-client = TelegramClient('session', int(os.environ['38107594']), os.environ['41c14c86d3b16088c264fb68cd8fc050'])
+# # فایلِ نشست به صورت خودکار خوانده می‌شود
+# client = TelegramClient('session', int(os.environ['38107594']), os.environ['41c14c86d3b16088c264fb68cd8fc050'])
 if __name__ == '__main__':
     run_worker()
