@@ -1,42 +1,45 @@
-from flask import Flask, request, jsonify
+import gspread
+import time
+import os
+import json
 from telethon import TelegramClient
 from telethon.sessions import StringSession
-import os
-import asyncio
-from threading import Thread
+from google.oauth2 import service_account
 
-app = Flask(__name__)
+# تنظیمات کلاینت (مطمئن شو در Variables سایت Railway این‌ها را داری)
+client = TelegramClient(StringSession(os.environ['SESSION_STRING']), 
+                        int(os.environ['API_ID']), os.environ['API_HASH'])
 
-# دریافت تنظیمات از محیط Railway
-API_ID = int(os.environ.get('API_ID', 0))
-API_HASH = os.environ.get('API_HASH', '')
-SESSION_STRING = os.environ.get('SESSION_STRING', '')
-
-# راه اندازی کلاینت تلگرام
-client = TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH)
-
-# اجرای کلاینت در یک رشته (Thread) جداگانه برای جلوگیری از تداخل
-def start_client():
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(client.start())
-    loop.run_forever()
-
-# استارت کلاینت در پس‌زمینه
-Thread(target=start_client, daemon=True).start()
-
-@app.route('/send', methods=['POST'])
-def send_message():
-    data = request.json
-    phone = data.get('phone')
-    message = data.get('message')
-
-    try:
-        # ارسال پیام با استفاده از کلاینتِ فعال در رشته‌ی جداگانه
-        asyncio.run_coroutine_threadsafe(client.send_message(phone, message), client.loop).result()
-        return jsonify({"status": "success"}), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+def run_worker():
+    client.start()
+    
+    # خواندن دسترسی از متغیر محیطی (بدون نیاز به فایل)
+    creds_dict = json.loads(os.environ['GOOGLE_CREDENTIALS'])
+    creds = service_account.Credentials.from_service_account_info(creds_dict)
+    gc = gspread.authorize(creds)
+    
+    # نام شیت خود را اینجا بنویس
+    sh = gc.open("n8n google sheet").sheet1 
+    
+    print("ربات شروع به کار کرد...")
+    
+    while True:
+        try:
+            rows = sh.get_all_records()
+            for i, row in enumerate(rows):
+                # اگر وضعیت 'done' نبود و شماره‌ای وجود داشت، پیام را بفرست
+                if row.get('status') != 'done' and row.get('شماره'):
+                    print(f"در حال ارسال به {row['شماره']}...")
+                    client.send_message(row['شماره'], f"سلام {row['نام']} {row['نام خانوادگی']}، وقت بخیر")
+                    
+                    # ثبت وضعیت در ستون D (ستون چهارم)
+                    sh.update_cell(i + 2, 4, 'done')
+                    time.sleep(10) # تأخیر برای جلوگیری از اسپم
+            
+        except Exception as e:
+            print(f"Error: {e}")
+            
+        time.sleep(60) # هر یک دقیقه چک کن
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    run_worker()
