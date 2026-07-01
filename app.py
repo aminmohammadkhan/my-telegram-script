@@ -42,6 +42,14 @@ def run_worker():
             print(f"Error: {e}")
             
         time.sleep(60) # هر یک دقیقه چک کن
+        import os
+
+# این کد مسیرِ دقیقِ فایل را پیدا می‌کند، فارغ از اینکه کد در چه پوشه‌ای اجرا شود
+file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'credentials.json')
+
+# استفاده از مسیرِ مطلق
+creds = Credentials.from_service_account_file(file_path, scopes=scopes)
+gc = gspread.authorize(creds)
 # # فایلِ نشست به صورت خودکار خوانده می‌شود
 # client = TelegramClient('session', int(os.environ['38107594']), os.environ['41c14c86d3b16088c264fb68cd8fc050'])
 if __name__ == '__main__':
